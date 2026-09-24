@@ -1,8 +1,9 @@
-﻿@echo off
+@echo off
 chcp 65001 >nul
 setlocal EnableExtensions EnableDelayedExpansion
 
 title Tekika AI - Setup
+
 cd /d "%~dp0"
 
 set "BACKEND_DIR=%~dp0tekika-ai-backend"
@@ -22,14 +23,18 @@ set "C_YELLOW=!ESC![93m"
 set "C_RED=!ESC![91m"
 set "C_WHITE=!ESC![97m"
 
+rem ================================================================
+rem Initial checks
+rem ================================================================
+
 cls
 echo.
 echo !C_CYAN!============================================================!C_RESET!
 echo !C_WHITE!                       TEKIKA AI SETUP!C_RESET!
 echo !C_CYAN!============================================================!C_RESET!
 echo.
-echo !C_DIM!This setup installs project dependencies and creates the
-echo required local data directories.!C_RESET!
+echo !C_DIM!This setup checks the current environment first.!C_RESET!
+echo !C_DIM!Only missing components will be offered for installation.!C_RESET!
 echo.
 
 if not exist "%BACKEND_DIR%\." (
@@ -49,204 +54,599 @@ if not exist "%FRONTEND_DIR%\." (
 )
 
 rem ================================================================
-rem [1/4] Python
+rem Status variables
 rem ================================================================
+
+set "PYTHON_OK=0"
+set "PYTHON_VERSION="
+set "PYTHON_PACKAGES_OK=0"
+
+set "NODE_OK=0"
+set "NODE_VERSION="
+set "NPM_OK=0"
+set "NPM_VERSION="
+set "FRONTEND_DEPS_OK=0"
+
+set "ENV_OK=0"
+set "ENV_EXAMPLE_OK=0"
+
+set "BACKEND_DIRS_OK=0"
+
+set "OLLAMA_OK=0"
+set "OLLAMA_PYTHON_OK=0"
+set "OLLAMA_SERVER_OK=0"
+
+set "MISSING_COUNT=0"
+
+rem ================================================================
+rem [1] Check Python
+rem ================================================================
+
 echo.
 echo !C_BLUE!------------------------------------------------------------!C_RESET!
-echo !C_WHITE![1/4] Python environment!C_RESET!
+echo !C_WHITE![1] Checking Python environment!C_RESET!
 echo !C_BLUE!------------------------------------------------------------!C_RESET!
 echo.
 
 py --version >nul 2>&1
+
 if errorlevel 1 (
-    echo !C_RED![ERROR] Python Launcher "py" was not found.!C_RESET!
-    echo.
-    echo !C_YELLOW!Please install Python 3.10 or newer, then run this setup again.!C_RESET!
-    echo.
-    pause
-    exit /b 1
-)
-
-py -c "import sys; sys.exit(0 if sys.version_info >= (3,10) else 1)"
-if errorlevel 1 (
-    echo !C_RED![ERROR] Python 3.10 or newer is required.!C_RESET!
-    py --version
-    echo.
-    pause
-    exit /b 1
-)
-
-for /f "delims=" %%V in ('py --version 2^>^&1') do set "PY_VERSION=%%V"
-echo !C_GREEN![OK] !C_RESET!!PY_VERSION!
-
-cd /d "%BACKEND_DIR%"
-
-echo.
-echo !C_CYAN!Updating pip...!C_RESET!
-py -m pip install --upgrade pip --progress-bar on
-if errorlevel 1 (
-    echo.
-    echo !C_RED![ERROR] Failed to update pip.!C_RESET!
-    pause
-    exit /b 1
-)
-
-echo.
-echo !C_CYAN!Installing Python dependencies...!C_RESET!
-py -m pip install -r requirements.txt --progress-bar on
-if errorlevel 1 (
-    echo.
-    echo !C_RED![ERROR] Failed to install Python dependencies.!C_RESET!
-    pause
-    exit /b 1
-)
-
-echo.
-echo !C_GREEN![OK] Python dependencies installed.!C_RESET!
-
-rem ================================================================
-rem .env
-rem ================================================================
-echo.
-if not exist ".env" (
-    if not exist ".env.example" (
-        echo !C_RED![ERROR] .env.example was not found.!C_RESET!
-        pause
-        exit /b 1
-    )
-    copy /Y ".env.example" ".env" >nul
-    echo !C_GREEN![OK] Created .env from .env.example.!C_RESET!
-    echo !C_YELLOW!     Edit .env if you need to configure a cloud LLM API key.!C_RESET!
+    echo !C_RED![NG] Python Launcher "py" was not found.!C_RESET!
+    set "PYTHON_OK=0"
+    set /a MISSING_COUNT+=1
 ) else (
-    echo !C_GREEN![OK] Existing .env preserved.!C_RESET!
+    py -c "import sys; sys.exit(0 if sys.version_info >= (3,10) else 1)" >nul 2>&1
+
+    if errorlevel 1 (
+        echo !C_RED![NG] Python 3.10 or newer is required.!C_RESET!
+        py --version
+        set "PYTHON_OK=0"
+        set /a MISSING_COUNT+=1
+    ) else (
+        for /f "delims=" %%V in ('py --version 2^>^&1') do set "PYTHON_VERSION=%%V"
+        echo !C_GREEN![OK] !C_RESET!!PYTHON_VERSION!
+        set "PYTHON_OK=1"
+    )
 )
 
 rem ================================================================
-rem [2/4] Node.js / npm
+rem [2] Check Python packages
 rem ================================================================
+
 echo.
 echo !C_BLUE!------------------------------------------------------------!C_RESET!
-echo !C_WHITE![2/4] Node.js / npm environment!C_RESET!
+echo !C_WHITE![2] Checking Python packages!C_RESET!
+echo !C_BLUE!------------------------------------------------------------!C_RESET!
+echo.
+
+if "!PYTHON_OK!"=="1" (
+    cd /d "%BACKEND_DIR%"
+
+    set "PY_PACKAGES_MISSING=0"
+
+    py -c "import fastapi" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] FastAPI!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] FastAPI!C_RESET!
+    )
+
+    py -c "import uvicorn" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] Uvicorn!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] Uvicorn!C_RESET!
+    )
+
+    py -c "import pydantic" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] Pydantic!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] Pydantic!C_RESET!
+    )
+
+    py -c "import pydantic_settings" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] Pydantic Settings!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] Pydantic Settings!C_RESET!
+    )
+
+    py -c "import dotenv" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] python-dotenv!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] python-dotenv!C_RESET!
+    )
+
+    py -c "import httpx" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] httpx!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] httpx!C_RESET!
+    )
+
+    py -c "import git" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] GitPython!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] GitPython!C_RESET!
+    )
+
+    py -c "import chromadb" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] ChromaDB!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] ChromaDB!C_RESET!
+    )
+
+    py -c "from PIL import Image" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] Pillow!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] Pillow!C_RESET!
+    )
+
+    py -c "import multipart" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] python-multipart!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] python-multipart!C_RESET!
+    )
+
+    py -c "import ollama" >nul 2>&1
+    if errorlevel 1 (
+        echo !C_RED![NG] Ollama Python Library!C_RESET!
+        set "PY_PACKAGES_MISSING=1"
+    ) else (
+        echo !C_GREEN![OK] Ollama Python Library!C_RESET!
+    )
+
+    if "!PY_PACKAGES_MISSING!"=="0" (
+        set "PYTHON_PACKAGES_OK=1"
+    ) else (
+        set /a MISSING_COUNT+=1
+    )
+) else (
+    echo !C_YELLOW![SKIP] Python packages cannot be checked because Python is unavailable.!C_RESET!
+)
+
+rem ================================================================
+rem [3] Check Node.js / npm
+rem ================================================================
+
+echo.
+echo !C_BLUE!------------------------------------------------------------!C_RESET!
+echo !C_WHITE![3] Checking Node.js / npm environment!C_RESET!
 echo !C_BLUE!------------------------------------------------------------!C_RESET!
 echo.
 
 node --version >nul 2>&1
+
 if errorlevel 1 (
-    echo !C_RED![ERROR] Node.js was not found.!C_RESET!
-    echo !C_YELLOW!Please install Node.js 18.17 or newer, then run this setup again.!C_RESET!
-    echo.
-    pause
-    exit /b 1
+    echo !C_RED![NG] Node.js was not found.!C_RESET!
+    set "NODE_OK=0"
+    set /a MISSING_COUNT+=1
+) else (
+    for /f "delims=" %%V in ('node --version') do set "NODE_VERSION=%%V"
+
+    powershell -NoProfile -Command "$v=[version]'!NODE_VERSION:~1!'; if($v -ge [version]'18.17.0'){exit 0}else{exit 1}" >nul 2>&1
+
+    if errorlevel 1 (
+        echo !C_RED![NG] Node.js 18.17 or newer is required.!C_RESET!
+        echo !C_RED!Installed version: !NODE_VERSION!!C_RESET!
+        set "NODE_OK=0"
+        set /a MISSING_COUNT+=1
+    ) else (
+        echo !C_GREEN![OK] !C_RESET!!NODE_VERSION!
+        set "NODE_OK=1"
+    )
 )
 
-node -e "const v=process.versions.node.split('.').map(Number); process.exit(v[0]>18 || (v[0]===18 && v[1]>=17) ? 0 : 1)"
+call npm --version >nul 2>&1
+
 if errorlevel 1 (
-    echo !C_RED![ERROR] Node.js 18.17 or newer is required.!C_RESET!
-    node --version
-    echo.
-    pause
-    exit /b 1
+    echo !C_RED![NG] npm was not found.!C_RESET!
+    set "NPM_OK=0"
+    set /a MISSING_COUNT+=1
+) else (
+    for /f "delims=" %%V in ('call npm --version') do set "NPM_VERSION=%%V"
+    echo !C_GREEN![OK] !C_RESET!npm !NPM_VERSION!
+    set "NPM_OK=1"
 )
-
-npm --version >nul 2>&1
-if errorlevel 1 (
-    echo !C_RED![ERROR] npm was not found.!C_RESET!
-    pause
-    exit /b 1
-)
-
-for /f "delims=" %%V in ('node --version') do set "NODE_VERSION=%%V"
-for /f "delims=" %%V in ('npm --version') do set "NPM_VERSION=%%V"
-
-echo !C_GREEN![OK] !C_RESET!Node.js !NODE_VERSION! / npm !NPM_VERSION!
-
-cd /d "%FRONTEND_DIR%"
-
-echo.
-echo !C_CYAN!Installing frontend dependencies...!C_RESET!
-npm install --progress=true
-if errorlevel 1 (
-    echo.
-    echo !C_RED![ERROR] npm install failed.!C_RESET!
-    pause
-    exit /b 1
-)
-
-echo.
-echo !C_GREEN![OK] Frontend dependencies installed.!C_RESET!
-
 rem ================================================================
-rem [3/4] Backend directories
+rem [4] Check frontend dependencies
 rem ================================================================
+
 echo.
 echo !C_BLUE!------------------------------------------------------------!C_RESET!
-echo !C_WHITE![3/4] Backend data directories!C_RESET!
+echo !C_WHITE![4] Checking frontend dependencies!C_RESET!
 echo !C_BLUE!------------------------------------------------------------!C_RESET!
 echo.
+
+if not exist "%FRONTEND_DIR%\package.json" (
+    echo !C_RED![NG] package.json was not found.!C_RESET!
+    set /a MISSING_COUNT+=1
+) else (
+    echo !C_GREEN![OK] package.json!C_RESET!
+
+    if exist "%FRONTEND_DIR%\node_modules\." (
+        echo !C_GREEN![OK] node_modules!C_RESET!
+        set "FRONTEND_DEPS_OK=1"
+    ) else (
+        echo !C_RED![NG] node_modules was not found.!C_RESET!
+        set /a MISSING_COUNT+=1
+    )
+)
+
+rem ================================================================
+rem [5] Check .env
+rem ================================================================
+
+echo.
+echo !C_BLUE!------------------------------------------------------------!C_RESET!
+echo !C_WHITE![5] Checking environment configuration!C_RESET!
+echo !C_BLUE!------------------------------------------------------------!C_RESET!
+echo.
+
+if exist "%BACKEND_DIR%\.env" (
+    echo !C_GREEN![OK] .env!C_RESET!
+    set "ENV_OK=1"
+) else (
+    echo !C_RED![NG] .env was not found.!C_RESET!
+    set /a MISSING_COUNT+=1
+)
+
+if exist "%BACKEND_DIR%\.env.example" (
+    echo !C_GREEN![OK] .env.example!C_RESET!
+    set "ENV_EXAMPLE_OK=1"
+) else (
+    echo !C_RED![NG] .env.example was not found.!C_RESET!
+)
+
+rem ================================================================
+rem [6] Check backend directories
+rem ================================================================
+
+echo.
+echo !C_BLUE!------------------------------------------------------------!C_RESET!
+echo !C_WHITE![6] Checking backend data directories!C_RESET!
+echo !C_BLUE!------------------------------------------------------------!C_RESET!
+echo.
+
+set "BACKEND_DIRS_MISSING=0"
+
+for %%D in (
+    "data"
+    "data\exports"
+    "data\images"
+    "data\chroma"
+    "plugins"
+) do (
+    if exist "%BACKEND_DIR%\%%~D\." (
+        echo !C_GREEN![OK] %%~D!C_RESET!
+    ) else (
+        echo !C_RED![NG] %%~D!C_RESET!
+        set "BACKEND_DIRS_MISSING=1"
+    )
+)
+
+if "!BACKEND_DIRS_MISSING!"=="0" (
+    set "BACKEND_DIRS_OK=1"
+) else (
+    set /a MISSING_COUNT+=1
+)
+
+rem ================================================================
+rem [7] Check Ollama
+rem ================================================================
+
+echo.
+echo !C_BLUE!------------------------------------------------------------!C_RESET!
+echo !C_WHITE![7] Checking Ollama!C_RESET!
+echo !C_BLUE!------------------------------------------------------------!C_RESET!
+echo.
+
+ollama --version >nul 2>&1
+
+if errorlevel 1 (
+    echo !C_RED![NG] Ollama was not found.!C_RESET!
+    set "OLLAMA_OK=0"
+    set /a MISSING_COUNT+=1
+) else (
+    for /f "delims=" %%V in ('ollama --version 2^>^&1') do set "OLLAMA_VERSION=%%V"
+    echo !C_GREEN![OK] !C_RESET!!OLLAMA_VERSION!
+    set "OLLAMA_OK=1"
+
+    if "!PYTHON_OK!"=="1" (
+        py -c "import ollama" >nul 2>&1
+        if errorlevel 1 (
+            echo !C_RED![NG] Ollama Python Library!C_RESET!
+            set "OLLAMA_PYTHON_OK=0"
+        ) else (
+            echo !C_GREEN![OK] Ollama Python Library!C_RESET!
+            set "OLLAMA_PYTHON_OK=1"
+        )
+    )
+
+    powershell -NoProfile -Command "try { Invoke-WebRequest -Uri 'http://localhost:11434/api/tags' -UseBasicParsing -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
+
+    if errorlevel 1 (
+        echo !C_YELLOW![WARN] Ollama is installed but the server is not running.!C_RESET!
+    ) else (
+        echo !C_GREEN![OK] Ollama server is running.!C_RESET!
+        set "OLLAMA_SERVER_OK=1"
+    )
+)
+
+rem ================================================================
+rem Detection summary
+rem ================================================================
+
+echo.
+echo !C_CYAN!============================================================!C_RESET!
+echo !C_WHITE!                    DETECTION COMPLETE!C_RESET!
+echo !C_CYAN!============================================================!C_RESET!
+echo.
+
+if "!MISSING_COUNT!"=="0" (
+    echo !C_GREEN![OK] All required components are already available.!C_RESET!
+    echo.
+    goto :CREATE_ENV_AND_FINISH
+)
+
+echo !C_YELLOW!Missing or incomplete components were detected.!C_RESET!
+echo !C_YELLOW!You can approve each installation individually below.!C_RESET!
+echo.
+
+rem ================================================================
+rem Installation approval: Python
+rem ================================================================
+
+if "!PYTHON_OK!"=="0" (
+    echo !C_WHITE!Python 3.10 or newer is required.!C_RESET!
+    echo.
+    choice /C YN /N /M "Install Python automatically? [Y/N]: "
+
+    if errorlevel 2 (
+        echo !C_YELLOW![SKIP] Python installation skipped.!C_RESET!
+    ) else (
+        echo.
+        echo !C_CYAN!Opening the official Python download page...!C_RESET!
+        start "" "https://www.python.org/downloads/windows/"
+        echo !C_DIM!Please install Python manually, then run this setup again.!C_RESET!
+    )
+
+    echo.
+)
+
+rem ================================================================
+rem Installation approval: Python packages
+rem ================================================================
+
+if "!PYTHON_OK!"=="1" if "!PYTHON_PACKAGES_OK!"=="0" (
+    echo !C_WHITE!Some Python packages are missing.!C_RESET!
+    echo.
+    choice /C YN /N /M "Install Python dependencies from requirements.txt? [Y/N]: "
+
+    if errorlevel 2 (
+        echo !C_YELLOW![SKIP] Python dependency installation skipped.!C_RESET!
+    ) else (
+        cd /d "%BACKEND_DIR%"
+
+        echo.
+        echo !C_CYAN!Updating pip...!C_RESET!
+        py -m pip install --upgrade pip --progress-bar on
+
+        if errorlevel 1 (
+            echo !C_RED![ERROR] Failed to update pip.!C_RESET!
+        ) else (
+            echo.
+            echo !C_CYAN!Installing Python dependencies...!C_RESET!
+            py -m pip install -r requirements.txt --progress-bar on
+
+            if errorlevel 1 (
+                echo !C_RED![ERROR] Failed to install Python dependencies.!C_RESET!
+            ) else (
+                echo !C_GREEN![OK] Python dependencies installed.!C_RESET!
+            )
+        )
+    )
+
+    echo.
+)
+
+rem ================================================================
+rem Installation approval: Node.js
+rem ================================================================
+
+if "!NODE_OK!"=="0" (
+    echo !C_WHITE!Node.js 18.17 or newer is required.!C_RESET!
+    echo.
+    choice /C YN /N /M "Open the official Node.js download page? [Y/N]: "
+
+    if errorlevel 2 (
+        echo !C_YELLOW![SKIP] Node.js installation skipped.!C_RESET!
+    ) else (
+        start "" "https://nodejs.org/en/download"
+        echo !C_GREEN![OK] Browser opened.!C_RESET!
+        echo !C_DIM!Install Node.js manually, then run this setup again.!C_RESET!
+    )
+
+    echo.
+)
+
+rem ================================================================
+rem Installation approval: npm dependencies
+rem ================================================================
+
+if "!NODE_OK!"=="1" if "!NPM_OK!"=="1" if "!FRONTEND_DEPS_OK!"=="0" (
+    echo !C_WHITE!Frontend dependencies are missing.!C_RESET!
+    echo.
+    choice /C YN /N /M "Run npm install? [Y/N]: "
+
+    if errorlevel 2 (
+        echo !C_YELLOW![SKIP] Frontend dependency installation skipped.!C_RESET!
+    ) else (
+        cd /d "%FRONTEND_DIR%"
+
+        echo.
+        echo !C_CYAN!Installing frontend dependencies...!C_RESET!
+        call npm install --progress=true
+
+        if errorlevel 1 (
+            echo !C_RED![ERROR] npm install failed.!C_RESET!
+        ) else (
+            echo !C_GREEN![OK] Frontend dependencies installed.!C_RESET!
+        )
+    )
+
+    echo.
+)
+
+rem ================================================================
+rem Installation approval: .env
+rem ================================================================
+
+if "!ENV_OK!"=="0" (
+    if "!ENV_EXAMPLE_OK!"=="1" (
+        echo !C_WHITE!.env does not exist, but .env.example is available.!C_RESET!
+        echo.
+        choice /C YN /N /M "Create .env from .env.example? [Y/N]: "
+
+        if errorlevel 2 (
+            echo !C_YELLOW![SKIP] .env creation skipped.!C_RESET!
+        ) else (
+            copy /Y "%BACKEND_DIR%\.env.example" "%BACKEND_DIR%\.env" >nul
+
+            if errorlevel 1 (
+                echo !C_RED![ERROR] Failed to create .env.!C_RESET!
+            ) else (
+                echo !C_GREEN![OK] Created .env from .env.example.!C_RESET!
+            )
+        )
+
+        echo.
+    ) else (
+        echo !C_RED![ERROR] .env.example is also missing.!C_RESET!
+        echo !C_YELLOW!Cannot create .env automatically.!C_RESET!
+        echo.
+    )
+)
+
+rem ================================================================
+rem Installation approval: backend directories
+rem ================================================================
+
+if "!BACKEND_DIRS_OK!"=="0" (
+    echo !C_WHITE!Some backend data directories are missing.!C_RESET!
+    echo.
+    choice /C YN /N /M "Create missing backend directories? [Y/N]: "
+
+    if errorlevel 2 (
+        echo !C_YELLOW![SKIP] Backend directory creation skipped.!C_RESET!
+    ) else (
+        if not exist "%BACKEND_DIR%\data\." mkdir "%BACKEND_DIR%\data"
+        if not exist "%BACKEND_DIR%\data\exports\." mkdir "%BACKEND_DIR%\data\exports"
+        if not exist "%BACKEND_DIR%\data\images\." mkdir "%BACKEND_DIR%\data\images"
+        if not exist "%BACKEND_DIR%\data\chroma\." mkdir "%BACKEND_DIR%\data\chroma"
+        if not exist "%BACKEND_DIR%\plugins\." mkdir "%BACKEND_DIR%\plugins"
+
+        echo !C_GREEN![OK] Backend directories are ready.!C_RESET!
+    )
+
+    echo.
+)
+
+rem ================================================================
+rem Installation approval: Ollama
+rem ================================================================
+
+if "!OLLAMA_OK!"=="0" (
+    echo !C_WHITE!Ollama is not installed.!C_RESET!
+    echo.
+    echo !C_WHITE![1]!C_RESET! Open the official Ollama download page
+    echo !C_WHITE![2]!C_RESET! Show the official PowerShell install command
+    echo !C_WHITE![3]!C_RESET! Skip Ollama
+    echo.
+
+    choice /C 123 /N /M "Select [1-3]: "
+
+    if errorlevel 3 (
+        echo !C_YELLOW![SKIP] Ollama installation skipped.!C_RESET!
+    ) else if errorlevel 2 (
+        echo.
+        echo !C_WHITE!PowerShell command:!C_RESET!
+        echo.
+        echo !C_YELLOW!!OLLAMA_PS!!C_RESET!
+        echo.
+        echo !C_DIM!The command is only displayed. It is not executed by this setup.!C_RESET!
+    ) else (
+        echo.
+        echo !C_CYAN!Opening the official Ollama download page...!C_RESET!
+        start "" "%OLLAMA_URL%"
+        echo !C_GREEN![OK] Browser opened.!C_RESET!
+        echo !C_DIM!Install Ollama manually, then run this setup again.!C_RESET!
+    )
+
+    echo.
+)
+
+rem ================================================================
+rem Final environment creation
+rem ================================================================
+
+:CREATE_ENV_AND_FINISH
 
 cd /d "%BACKEND_DIR%"
 
-if not exist "data" mkdir "data"
-if not exist "data\exports" mkdir "data\exports"
-if not exist "data\images" mkdir "data\images"
-if not exist "data\chroma" mkdir "data\chroma"
-if not exist "plugins" mkdir "plugins"
+if not exist "data\." mkdir "data"
+if not exist "data\exports\." mkdir "data\exports"
+if not exist "data\images\." mkdir "data\images"
+if not exist "data\chroma\." mkdir "data\chroma"
+if not exist "plugins\." mkdir "plugins"
 
-echo !C_GREEN![OK] Backend data directories are ready.!C_RESET!
+if not exist ".env" if exist ".env.example" (
+    echo.
+    echo !C_YELLOW![INFO] .env is still missing.!C_RESET!
+    choice /C YN /N /M "Create .env from .env.example now? [Y/N]: "
 
-rem ================================================================
-rem [4/4] Ollama - user controlled
-rem ================================================================
-echo.
-echo !C_BLUE!------------------------------------------------------------!C_RESET!
-echo !C_WHITE![4/4] Ollama (optional / user controlled)!C_RESET!
-echo !C_BLUE!------------------------------------------------------------!C_RESET!
-echo.
-echo !C_DIM!Ollama is NOT installed automatically.!C_RESET!
-echo !C_DIM!Choose how you want to install it, or skip it for now.!C_RESET!
-echo.
-echo !C_WHITE![1]!C_RESET! Open the official Ollama download page
-echo !C_WHITE![2]!C_RESET! Show the official PowerShell install command
-echo !C_WHITE![3]!C_RESET! Skip Ollama setup
-echo.
-
-set "OLLAMA_CHOICE="
-set /p "OLLAMA_CHOICE=Select [1-3]: "
-
-if "!OLLAMA_CHOICE!"=="1" (
-    echo.
-    echo !C_CYAN!Opening the official Ollama download page...!C_RESET!
-    start "" "%OLLAMA_URL%"
-    echo !C_GREEN![OK] Browser opened.!C_RESET!
-    echo !C_DIM!Install Ollama manually from the official page.!C_RESET!
-) else if "!OLLAMA_CHOICE!"=="2" (
-    echo.
-    echo !C_WHITE!PowerShell command:!C_RESET!
-    echo.
-    echo !C_YELLOW!!OLLAMA_PS!!C_RESET!
-    echo.
-    echo !C_DIM!The command above is only displayed. This setup does not execute it.!C_RESET!
-) else if "!OLLAMA_CHOICE!"=="3" (
-    echo.
-    echo !C_YELLOW![SKIP] Ollama setup skipped.!C_RESET!
-) else (
-    echo.
-    echo !C_YELLOW![SKIP] Invalid selection. Ollama setup skipped.!C_RESET!
+    if not errorlevel 2 (
+        copy /Y ".env.example" ".env" >nul
+        echo !C_GREEN![OK] .env created.!C_RESET!
+    )
 )
 
 rem ================================================================
 rem Finish
 rem ================================================================
+
 echo.
 echo !C_CYAN!============================================================!C_RESET!
 echo !C_GREEN!                    SETUP COMPLETED!C_RESET!
 echo !C_CYAN!============================================================!C_RESET!
 echo.
+
+echo !C_WHITE!The setup process is complete.!C_RESET!
+echo.
 echo !C_WHITE!Next steps:!C_RESET!
 echo   1. Run environment-checker.bat
-echo   2. If you use Ollama, install Ollama and then pull the required model
+echo   2. Review your .env configuration
+echo   3. If you use Ollama, make sure the required model is available
+echo   4. Run start-tekika.bat
 echo.
 echo !C_DIM!Project directory: %~dp0!C_RESET!
 echo.
+
 pause
 exit /b 0
