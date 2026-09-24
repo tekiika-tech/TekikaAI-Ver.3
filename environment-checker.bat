@@ -19,7 +19,7 @@ set "ERROR_COUNT=0"
 REM =========================================
 REM 1. Python
 REM =========================================
-echo [1/5] Python
+echo [1/7] Python
 echo -----------------------------------------
 
 py --version >nul 2>&1
@@ -40,7 +40,7 @@ echo.
 REM =========================================
 REM 2. Python packages
 REM =========================================
-echo [2/5] Pythonパッケージ
+echo [2/7] Pythonパッケージ
 echo -----------------------------------------
 
 if not exist "%~dp0tekika-ai-backend\requirements.txt" (
@@ -157,7 +157,7 @@ echo.
 REM =========================================
 REM 3. Node.js / npm
 REM =========================================
-echo [3/5] Node.js / npm
+echo [3/7] Node.js / npm
 echo -----------------------------------------
 
 node --version >nul 2>&1
@@ -190,7 +190,7 @@ echo.
 REM =========================================
 REM 4. Frontend
 REM =========================================
-echo [4/5] フロントエンド
+echo [4/7] フロントエンド
 echo -----------------------------------------
 
 if not exist "%~dp0tekika-ai-frontend\package.json" (
