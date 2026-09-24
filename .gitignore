@@ -1,0 +1,33 @@
+# Secrets / local configuration
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Frontend
+node_modules/
+.next/
+out/
+dist/
+
+# Runtime data
+*.db
+*.sqlite
+*.sqlite3
+data/
+*.log
+
+# Local IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Generated archives
+TekikaAI-Distribution.zip
+TekikaAI-source.zip
