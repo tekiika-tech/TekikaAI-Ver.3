@@ -7,11 +7,11 @@ title Tekika AI - Environment Checker
 cd /d "%~dp0"
 
 echo =========================================
-echo       Tekika AI ŠÂ‹«ƒ`ƒFƒbƒN
+echo       Tekika AI ç’°å¢ƒãƒã‚§ãƒƒã‚¯
 echo =========================================
 echo.
-echo ‚±‚ÌƒvƒƒOƒ‰ƒ€‚ÍŠÂ‹«‚ÌŠm”F‚Ì‚İ‚ğs‚¢‚Ü‚·B
-echo Python‚âNode.js‚È‚Ç‚Ìİ’è‚Í•ÏX‚µ‚Ü‚¹‚ñB
+echo ã“ã®ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã¯ç’°å¢ƒã®ç¢ºèªã®ã¿ã‚’è¡Œã„ã¾ã™ã€‚
+echo Pythonã‚„Node.jsãªã©ã®è¨­å®šã¯å¤‰æ›´ã—ã¾ã›ã‚“ã€‚
 echo.
 
 set "ERROR_COUNT=0"
@@ -19,15 +19,15 @@ set "ERROR_COUNT=0"
 REM =========================================
 REM 1. Python
 REM =========================================
-echo [1/5] Python
+echo [1/7] Python
 echo -----------------------------------------
 
 py --version >nul 2>&1
 
 if errorlevel 1 (
-    powershell -NoProfile -Command "Write-Host '[NG] Python Launcher (py) ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
-    powershell -NoProfile -Command "Write-Host '    ¨ Python‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
-    powershell -NoProfile -Command "Write-Host '    ¨ ƒCƒ“ƒXƒg[ƒ‹ŒãA‚±‚Ìƒ`ƒFƒbƒJ[‚ğ‚à‚¤ˆê“xÀs‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '[NG] Python Launcher (py) ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '    â†’ Pythonã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '    â†’ ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«å¾Œã€ã“ã®ãƒã‚§ãƒƒã‚«ãƒ¼ã‚’ã‚‚ã†ä¸€åº¦å®Ÿè¡Œã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
     set /a ERROR_COUNT+=1
 ) else (
     powershell -NoProfile -Command "Write-Host '[OK] Python' -ForegroundColor Green"
@@ -40,21 +40,21 @@ echo.
 REM =========================================
 REM 2. Python packages
 REM =========================================
-echo [2/5] PythonƒpƒbƒP[ƒW
+echo [2/7] Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸
 echo -----------------------------------------
 
 if not exist "%~dp0tekika-ai-backend\requirements.txt" (
-    powershell -NoProfile -Command "Write-Host '[NG] requirements.txt ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
-    powershell -NoProfile -Command "Write-Host '    ¨ tekika-ai-backend ƒtƒHƒ‹ƒ_[‚ª³‚µ‚­”z’u‚³‚ê‚Ä‚¢‚é‚©Šm”F‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
-    powershell -NoProfile -Command "Write-Host '    ¨ Tekika AI‚Ìƒ\[ƒXˆê®‚ğ³‚µ‚¢êŠ‚É”z’u‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '[NG] requirements.txt ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '    â†’ tekika-ai-backend ãƒ•ã‚©ãƒ«ãƒ€ãƒ¼ãŒæ­£ã—ãé…ç½®ã•ã‚Œã¦ã„ã‚‹ã‹ç¢ºèªã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '    â†’ Tekika AIã®ã‚½ãƒ¼ã‚¹ä¸€å¼ã‚’æ­£ã—ã„å ´æ‰€ã«é…ç½®ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
     set /a ERROR_COUNT+=1
 ) else (
 
     py -c "import fastapi" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] FastAPI' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] FastAPI' -ForegroundColor Green"
@@ -63,8 +63,8 @@ if not exist "%~dp0tekika-ai-backend\requirements.txt" (
     py -c "import uvicorn" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] Uvicorn' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] Uvicorn' -ForegroundColor Green"
@@ -73,8 +73,8 @@ if not exist "%~dp0tekika-ai-backend\requirements.txt" (
     py -c "import pydantic" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] Pydantic' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] Pydantic' -ForegroundColor Green"
@@ -83,8 +83,8 @@ if not exist "%~dp0tekika-ai-backend\requirements.txt" (
     py -c "import pydantic_settings" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] Pydantic Settings' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] Pydantic Settings' -ForegroundColor Green"
@@ -93,8 +93,8 @@ if not exist "%~dp0tekika-ai-backend\requirements.txt" (
     py -c "import dotenv" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] python-dotenv' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] python-dotenv' -ForegroundColor Green"
@@ -103,8 +103,8 @@ if not exist "%~dp0tekika-ai-backend\requirements.txt" (
     py -c "import httpx" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] httpx' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] httpx' -ForegroundColor Green"
@@ -113,8 +113,8 @@ if not exist "%~dp0tekika-ai-backend\requirements.txt" (
     py -c "import git" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] GitPython' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] GitPython' -ForegroundColor Green"
@@ -123,8 +123,8 @@ if not exist "%~dp0tekika-ai-backend\requirements.txt" (
     py -c "import chromadb" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] ChromaDB' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] ChromaDB' -ForegroundColor Green"
@@ -133,8 +133,8 @@ if not exist "%~dp0tekika-ai-backend\requirements.txt" (
     py -c "from PIL import Image" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] Pillow' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] Pillow' -ForegroundColor Green"
@@ -143,8 +143,8 @@ if not exist "%~dp0tekika-ai-backend\requirements.txt" (
     py -c "import multipart" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] python-multipart' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ PythonƒpƒbƒP[ƒW‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ requirements.txt ‚ÌˆË‘¶ŠÖŒW‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Pythonãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ requirements.txt ã®ä¾å­˜é–¢ä¿‚ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] python-multipart' -ForegroundColor Green"
@@ -157,15 +157,15 @@ echo.
 REM =========================================
 REM 3. Node.js / npm
 REM =========================================
-echo [3/5] Node.js / npm
+echo [3/7] Node.js / npm
 echo -----------------------------------------
 
 node --version >nul 2>&1
 
 if errorlevel 1 (
-    powershell -NoProfile -Command "Write-Host '[NG] Node.js ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
-    powershell -NoProfile -Command "Write-Host '    ¨ Node.js‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
-    powershell -NoProfile -Command "Write-Host '    ¨ ƒCƒ“ƒXƒg[ƒ‹ŒãA‚±‚Ìƒ`ƒFƒbƒJ[‚ğ‚à‚¤ˆê“xÀs‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '[NG] Node.js ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '    â†’ Node.jsã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '    â†’ ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«å¾Œã€ã“ã®ãƒã‚§ãƒƒã‚«ãƒ¼ã‚’ã‚‚ã†ä¸€åº¦å®Ÿè¡Œã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
     set /a ERROR_COUNT+=1
 ) else (
     powershell -NoProfile -Command "Write-Host '[OK] Node.js' -ForegroundColor Green"
@@ -175,9 +175,9 @@ if errorlevel 1 (
 call npm --version >nul 2>&1
 
 if errorlevel 1 (
-    powershell -NoProfile -Command "Write-Host '[NG] npm ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
-    powershell -NoProfile -Command "Write-Host '    ¨ Node.js‚ğƒCƒ“ƒXƒg[ƒ‹‚·‚é‚Ænpm‚à—˜—p‚Å‚«‚Ü‚·B' -ForegroundColor Yellow"
-    powershell -NoProfile -Command "Write-Host '    ¨ Node.js‚ÌƒCƒ“ƒXƒg[ƒ‹ŒãA‚±‚Ìƒ`ƒFƒbƒJ[‚ğ‚à‚¤ˆê“xÀs‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '[NG] npm ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '    â†’ Node.jsã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã™ã‚‹ã¨npmã‚‚åˆ©ç”¨ã§ãã¾ã™ã€‚' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '    â†’ Node.jsã®ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«å¾Œã€ã“ã®ãƒã‚§ãƒƒã‚«ãƒ¼ã‚’ã‚‚ã†ä¸€åº¦å®Ÿè¡Œã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
     set /a ERROR_COUNT+=1
 ) else (
     powershell -NoProfile -Command "Write-Host '[OK] npm' -ForegroundColor Green"
@@ -190,13 +190,13 @@ echo.
 REM =========================================
 REM 4. Frontend
 REM =========================================
-echo [4/5] ƒtƒƒ“ƒgƒGƒ“ƒh
+echo [4/7] ãƒ•ãƒ­ãƒ³ãƒˆã‚¨ãƒ³ãƒ‰
 echo -----------------------------------------
 
 if not exist "%~dp0tekika-ai-frontend\package.json" (
-    powershell -NoProfile -Command "Write-Host '[NG] package.json ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
-    powershell -NoProfile -Command "Write-Host '    ¨ tekika-ai-frontend ƒtƒHƒ‹ƒ_[‚ª³‚µ‚­”z’u‚³‚ê‚Ä‚¢‚é‚©Šm”F‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
-    powershell -NoProfile -Command "Write-Host '    ¨ Tekika AI‚Ìƒtƒƒ“ƒgƒGƒ“ƒhƒtƒ@ƒCƒ‹‚ğ³‚µ‚¢êŠ‚É”z’u‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '[NG] package.json ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '    â†’ tekika-ai-frontend ãƒ•ã‚©ãƒ«ãƒ€ãƒ¼ãŒæ­£ã—ãé…ç½®ã•ã‚Œã¦ã„ã‚‹ã‹ç¢ºèªã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '    â†’ Tekika AIã®ãƒ•ãƒ­ãƒ³ãƒˆã‚¨ãƒ³ãƒ‰ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æ­£ã—ã„å ´æ‰€ã«é…ç½®ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
     set /a ERROR_COUNT+=1
 ) else (
     powershell -NoProfile -Command "Write-Host '[OK] package.json' -ForegroundColor Green"
@@ -204,9 +204,9 @@ if not exist "%~dp0tekika-ai-frontend\package.json" (
     if exist "%~dp0tekika-ai-frontend\node_modules" (
         powershell -NoProfile -Command "Write-Host '[OK] node_modules' -ForegroundColor Green"
     ) else (
-        powershell -NoProfile -Command "Write-Host '[NG] node_modules ‚ª‚ ‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ ƒtƒƒ“ƒgƒGƒ“ƒh‚ÌˆË‘¶ƒpƒbƒP[ƒW‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB' -ForegroundColor Yellow"
-        powershell -NoProfile -Command "Write-Host '    ¨ tekika-ai-frontend ƒtƒHƒ‹ƒ_[‚Å npm install ‚ğÀs‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '[NG] node_modules ãŒã‚ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+        powershell -NoProfile -Command "Write-Host '    â†’ ãƒ•ãƒ­ãƒ³ãƒˆã‚¨ãƒ³ãƒ‰ã®ä¾å­˜ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ãŒã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ tekika-ai-frontend ãƒ•ã‚©ãƒ«ãƒ€ãƒ¼ã§ npm install ã‚’å®Ÿè¡Œã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     )
 )
@@ -217,19 +217,19 @@ echo.
 REM =========================================
 REM 5. Environment
 REM =========================================
-echo [5/7] ŠÂ‹«İ’è
+echo [5/7] ç’°å¢ƒè¨­å®š
 echo -----------------------------------------
 
 if not exist "%~dp0tekika-ai-backend\.env" (
-    powershell -NoProfile -Command "Write-Host '[NG] .env ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
-    powershell -NoProfile -Command "Write-Host '    ¨ tekika-ai-backend\.env.example ‚ğ .env ‚ÉƒRƒs[‚µ‚Äİ’è‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '[NG] .env ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '    â†’ tekika-ai-backend\.env.example ã‚’ .env ã«ã‚³ãƒ”ãƒ¼ã—ã¦è¨­å®šã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
     set /a ERROR_COUNT+=1
 ) else (
     powershell -NoProfile -Command "Write-Host '[OK] .env' -ForegroundColor Green"
 )
 
 if not exist "%~dp0tekika-ai-backend\.env.example" (
-    powershell -NoProfile -Command "Write-Host '[NG] .env.example ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '[NG] .env.example ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
     set /a ERROR_COUNT+=1
 ) else (
     powershell -NoProfile -Command "Write-Host '[OK] .env.example' -ForegroundColor Green"
@@ -241,8 +241,8 @@ if exist "%~dp0tekika-ai-backend\.env" (
 )
 
 if not defined LLM_PROVIDER (
-    powershell -NoProfile -Command "Write-Host '[NG] LLM_PROVIDER ‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB' -ForegroundColor Red"
-    powershell -NoProfile -Command "Write-Host '    ¨ .env ‚É ollama / openai / claude / gemini ‚Ì‚¢‚¸‚ê‚©‚ğİ’è‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '[NG] LLM_PROVIDER ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '    â†’ .env ã« ollama / openai / claude / gemini ã®ã„ãšã‚Œã‹ã‚’è¨­å®šã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
     set /a ERROR_COUNT+=1
 ) else (
     powershell -NoProfile -Command "Write-Host '[OK] LLM_PROVIDER = %LLM_PROVIDER%' -ForegroundColor Green"
@@ -261,12 +261,12 @@ echo [6/7] Ollama
 echo -----------------------------------------
 
 if /I not "%LLM_PROVIDER%"=="ollama" (
-    powershell -NoProfile -Command "Write-Host '[SKIP] LLM_PROVIDER ‚ªollama‚Å‚Í‚È‚¢‚½‚ßAOllama‚Ìƒ`ƒFƒbƒN‚ğÈ—ª‚µ‚Ü‚·B' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host '[SKIP] LLM_PROVIDER ãŒollamaã§ã¯ãªã„ãŸã‚ã€Ollamaã®ãƒã‚§ãƒƒã‚¯ã‚’çœç•¥ã—ã¾ã™ã€‚' -ForegroundColor Yellow"
 ) else (
     py -c "import ollama" >nul 2>&1
     if errorlevel 1 (
         powershell -NoProfile -Command "Write-Host '[NG] Ollama Python Library' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ Ollama Pythonƒ‰ƒCƒuƒ‰ƒŠ‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '    â†’ Ollama Pythonãƒ©ã‚¤ãƒ–ãƒ©ãƒªãŒä¸è¶³ã—ã¦ã„ã¾ã™ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] Ollama Python Library' -ForegroundColor Green"
@@ -274,27 +274,27 @@ if /I not "%LLM_PROVIDER%"=="ollama" (
 
     ollama --version >nul 2>&1
     if errorlevel 1 (
-        powershell -NoProfile -Command "Write-Host '[NG] Ollama ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
-        powershell -NoProfile -Command "Write-Host '    ¨ Ollama‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+        powershell -NoProfile -Command "Write-Host '[NG] Ollama ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+        powershell -NoProfile -Command "Write-Host '    â†’ Ollamaã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
         set /a ERROR_COUNT+=1
     ) else (
         powershell -NoProfile -Command "Write-Host '[OK] Ollama' -ForegroundColor Green"
         ollama --version
 
         echo.
-        echo OllamaƒT[ƒo[‚Ö‚ÌÚ‘±‚ğŠm”F‚µ‚Ä‚¢‚Ü‚·...
+        echo Ollamaã‚µãƒ¼ãƒãƒ¼ã¸ã®æ¥ç¶šã‚’ç¢ºèªã—ã¦ã„ã¾ã™...
 
         powershell -NoProfile -Command "try { Invoke-WebRequest -Uri 'http://localhost:11434/api/tags' -UseBasicParsing -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }"
         if errorlevel 1 (
-            powershell -NoProfile -Command "Write-Host '[NG] OllamaƒT[ƒo[‚ÉÚ‘±‚Å‚«‚Ü‚¹‚ñB' -ForegroundColor Red"
-            powershell -NoProfile -Command "Write-Host '    ¨ Ollama‚ª‹N“®‚µ‚Ä‚¢‚é‚©Šm”F‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+            powershell -NoProfile -Command "Write-Host '[NG] Ollamaã‚µãƒ¼ãƒãƒ¼ã«æ¥ç¶šã§ãã¾ã›ã‚“ã€‚' -ForegroundColor Red"
+            powershell -NoProfile -Command "Write-Host '    â†’ OllamaãŒèµ·å‹•ã—ã¦ã„ã‚‹ã‹ç¢ºèªã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
             set /a ERROR_COUNT+=1
         ) else (
-            powershell -NoProfile -Command "Write-Host '[OK] OllamaƒT[ƒo[‚ÉÚ‘±‚Å‚«‚Ü‚·B' -ForegroundColor Green"
+            powershell -NoProfile -Command "Write-Host '[OK] Ollamaã‚µãƒ¼ãƒãƒ¼ã«æ¥ç¶šã§ãã¾ã™ã€‚' -ForegroundColor Green"
         )
 
         echo.
-        echo ƒCƒ“ƒXƒg[ƒ‹Ï‚İƒ‚ƒfƒ‹:
+        echo ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«æ¸ˆã¿ãƒ¢ãƒ‡ãƒ«:
         ollama list
     )
 )
@@ -304,27 +304,27 @@ echo.
 REM =========================================
 REM 7. Backend
 REM =========================================
-echo [7/7] ƒoƒbƒNƒGƒ“ƒh\¬
+echo [7/7] ãƒãƒƒã‚¯ã‚¨ãƒ³ãƒ‰æ§‹æˆ
 echo -----------------------------------------
 
 if exist "%~dp0tekika-ai-backend\backend\main.py" (
     powershell -NoProfile -Command "Write-Host '[OK] backend\main.py' -ForegroundColor Green"
 ) else (
-    powershell -NoProfile -Command "Write-Host '[NG] backend\main.py ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '[NG] backend\main.py ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
     set /a ERROR_COUNT+=1
 )
 
 if exist "%~dp0tekika-ai-backend\backend\agent\factory.py" (
     powershell -NoProfile -Command "Write-Host '[OK] agent\factory.py' -ForegroundColor Green"
 ) else (
-    powershell -NoProfile -Command "Write-Host '[NG] agent\factory.py ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '[NG] agent\factory.py ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
     set /a ERROR_COUNT+=1
 )
 
 if exist "%~dp0tekika-ai-backend\backend\agent\orchestrator.py" (
     powershell -NoProfile -Command "Write-Host '[OK] agent\orchestrator.py' -ForegroundColor Green"
 ) else (
-    powershell -NoProfile -Command "Write-Host '[NG] agent\orchestrator.py ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '[NG] agent\orchestrator.py ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚' -ForegroundColor Red"
     set /a ERROR_COUNT+=1
 )
 
@@ -336,27 +336,27 @@ REM =========================================
 REM Result
 REM =========================================
 echo =========================================
-echo             ƒ`ƒFƒbƒNŒ‹‰Ê
+echo             ãƒã‚§ãƒƒã‚¯çµæœ
 echo =========================================
 echo.
 
 if "%ERROR_COUNT%"=="0" (
-    powershell -NoProfile -Command "Write-Host '[OK] ‚·‚×‚Ä‚Ìƒ`ƒFƒbƒN‚É‡Ši‚µ‚Ü‚µ‚½B' -ForegroundColor Green"
+    powershell -NoProfile -Command "Write-Host '[OK] ã™ã¹ã¦ã®ãƒã‚§ãƒƒã‚¯ã«åˆæ ¼ã—ã¾ã—ãŸã€‚' -ForegroundColor Green"
     echo.
-    echo Tekika AI‚ğ‹N“®‰Â”\‚Å‚·B
-    echo start-tekika.bat ‚ğÀs‚µ‚Ä‚­‚¾‚³‚¢B
+    echo Tekika AIã‚’èµ·å‹•å¯èƒ½ã§ã™ã€‚
+    echo start-tekika.bat ã‚’å®Ÿè¡Œã—ã¦ãã ã•ã„ã€‚
 ) else (
-    powershell -NoProfile -Command "Write-Host '[NG] %ERROR_COUNT% ŒÂ‚Ì–â‘è‚ªŒ©‚Â‚©‚è‚Ü‚µ‚½B' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '[NG] %ERROR_COUNT% å€‹ã®å•é¡ŒãŒè¦‹ã¤ã‹ã‚Šã¾ã—ãŸã€‚' -ForegroundColor Red"
     echo.
-    powershell -NoProfile -Command "Write-Host 'ã‹L‚Ì [NG] €–Ú‚Æ‰©F‚Ì‘Îˆ•û–@‚ğŠm”F‚µ‚Ä‚­‚¾‚³‚¢B' -ForegroundColor Yellow"
+    powershell -NoProfile -Command "Write-Host 'ä¸Šè¨˜ã® [NG] é …ç›®ã¨é»„è‰²ã®å¯¾å‡¦æ–¹æ³•ã‚’ç¢ºèªã—ã¦ãã ã•ã„ã€‚' -ForegroundColor Yellow"
 )
 
 echo.
 echo =========================================
-echo ƒ`ƒFƒbƒNI—¹
+echo ãƒã‚§ãƒƒã‚¯çµ‚äº†
 echo =========================================
 echo.
-echo EnterƒL[‚ğ‰Ÿ‚·‚ÆI—¹‚µ‚Ü‚·B
+echo Enterã‚­ãƒ¼ã‚’æŠ¼ã™ã¨çµ‚äº†ã—ã¾ã™ã€‚
 echo.
 
 pause
@@ -366,9 +366,9 @@ if exist "%~dp0tekika-ai-backend\.env" (
     for /f "usebackq tokens=1,* delims==" %%A in (`findstr /B /C:"%~1=" "%~dp0tekika-ai-backend\.env"`) do set "CHECK_KEY=%%B"
 )
 if not defined CHECK_KEY (
-    powershell -NoProfile -Command "Write-Host '[NG] %~2 ‚ÌAPIƒL[ (%~1) ‚ª–¢İ’è‚Ü‚½‚Í‹ó—“‚Å‚·B' -ForegroundColor Red"
+    powershell -NoProfile -Command "Write-Host '[NG] %~2 ã®APIã‚­ãƒ¼ (%~1) ãŒæœªè¨­å®šã¾ãŸã¯ç©ºæ¬„ã§ã™ã€‚' -ForegroundColor Red"
     set /a ERROR_COUNT+=1
 ) else (
-    powershell -NoProfile -Command "Write-Host '[OK] %~2 APIƒL[‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚·B' -ForegroundColor Green"
+    powershell -NoProfile -Command "Write-Host '[OK] %~2 APIã‚­ãƒ¼ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã™ã€‚' -ForegroundColor Green"
 )
 exit /b
