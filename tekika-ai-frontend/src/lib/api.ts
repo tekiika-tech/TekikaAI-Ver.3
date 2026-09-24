@@ -42,6 +42,17 @@ export interface ChatRequestPayload {
   mode?: AgentMode | null;
   stream?: boolean;
   regenerate?: boolean;
+  provider?: string | null;
+}
+
+export interface ProviderInfo {
+  provider: string;
+  default_model: string;
+  is_default: boolean;
+}
+
+export async function listProviders(): Promise<ProviderInfo[]> {
+  return requestJson<ProviderInfo[]>("/providers", { method: "GET" });
 }
 
 export interface ChatResponsePayload {
@@ -142,6 +153,7 @@ export interface SendChatMessageOptions {
    * 使って直前の回答を再生成する（「再試行」機能用）。既定はfalse。
    */
   regenerate?: boolean;
+  provider?: string | null;
 }
 
 /**
@@ -160,7 +172,7 @@ export async function sendChatMessage(
   mode: AgentMode,
   options: SendChatMessageOptions
 ): Promise<void> {
-  const { onChunk, onToolEvent, onDone, onError, signal, regenerate } = options;
+  const { onChunk, onToolEvent, onDone, onError, signal, regenerate, provider } = options;
 
   // onDone / onError のどちらか一方を必ず1回だけ発火させるためのガード。
   // これが無いと、「SSEの done イベント受信時」と「ReadableStream終了時」で
@@ -191,6 +203,7 @@ export async function sendChatMessage(
         mode,
         stream: true,
         regenerate: regenerate ?? false,
+        provider: provider ?? null,
       } as ChatRequestPayload),
       signal,
     });

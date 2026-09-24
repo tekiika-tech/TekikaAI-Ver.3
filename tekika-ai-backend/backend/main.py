@@ -103,7 +103,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # ローカルツールをオーケストレータに登録
     orchestrator.register_tool(git_tool.get_repo_status, "ローカルGitリポジトリのステータスを取得する。")
-    orchestrator.register_tool(git_tool.read_file, "ローカルGitリポジトリ内のファイルを読み込む。")
+    def read_file(file_path: str, repo_path: Optional[str] = None) -> Dict[str, str]:
+        """Read the actual UTF-8 contents of a local file; set repo_path for Git-rooted reads."""
+        if repo_path:
+            content = git_tool.read_file(repo_path, file_path)
+            target = Path(file_path)
+            return {"path": str(target), "name": target.name, "content": content}
+        return file_system_tool.read_file(file_path)
+
+    orchestrator.register_tool(
+        read_file,
+        "指定されたローカルテキストファイルの実際の内容を取得する。通常はfile_pathだけを渡す。"
+        "Gitリポジトリ内の相対パスを読む場合はrepo_pathとfile_pathを渡す。"
+        "ユーザーがファイル内容の表示・確認・分析を求めた場合、説明を生成する前に必ず使う。",
+    )
     orchestrator.register_tool(git_tool.write_file, "ローカルGitリポジトリ内のファイルへ書き込む。")
     orchestrator.register_tool(git_tool.commit_and_branch, "ブランチを切り替え、変更をコミットする。")
     orchestrator.register_tool(git_tool.get_log, "ローカルGitリポジトリのコミットログを取得する。")

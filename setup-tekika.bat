@@ -5,6 +5,11 @@ setlocal EnableExtensions EnableDelayedExpansion
 title Tekika AI - Setup
 
 cd /d "%~dp0"
+if errorlevel 1 (
+    echo [ERROR] Failed to enter the Tekika AI project directory: %~dp0
+    pause
+    exit /b 1
+)
 
 set "BACKEND_DIR=%~dp0tekika-ai-backend"
 set "FRONTEND_DIR=%~dp0tekika-ai-frontend"
@@ -73,10 +78,16 @@ set "ENV_EXAMPLE_OK=0"
 set "BACKEND_DIRS_OK=0"
 
 set "OLLAMA_OK=0"
-set "OLLAMA_PYTHON_OK=0"
 set "OLLAMA_SERVER_OK=0"
+set "OLLAMA_MODEL_OK=0"
+set "OLLAMA_MODEL=qwen2.5:latest"
 
 set "MISSING_COUNT=0"
+set "LLM_PROVIDER=ollama"
+if exist "%BACKEND_DIR%\.env" (
+    for /f "usebackq tokens=1,* delims==" %%A in (`findstr /B /C:"LLM_PROVIDER=" "%BACKEND_DIR%\.env"`) do set "LLM_PROVIDER=%%B"
+    for /f "usebackq tokens=1,* delims==" %%A in (`findstr /B /C:"OLLAMA_DEFAULT_MODEL=" "%BACKEND_DIR%\.env"`) do set "OLLAMA_MODEL=%%B"
+)
 
 rem ================================================================
 rem [1] Check Python
@@ -202,14 +213,6 @@ if "!PYTHON_OK!"=="1" (
         set "PY_PACKAGES_MISSING=1"
     ) else (
         echo !C_GREEN![OK] python-multipart!C_RESET!
-    )
-
-    py -c "import ollama" >nul 2>&1
-    if errorlevel 1 (
-        echo !C_RED![NG] Ollama Python Library!C_RESET!
-        set "PY_PACKAGES_MISSING=1"
-    ) else (
-        echo !C_GREEN![OK] Ollama Python Library!C_RESET!
     )
 
     if "!PY_PACKAGES_MISSING!"=="0" (
@@ -357,6 +360,11 @@ echo !C_WHITE![7] Checking Ollama!C_RESET!
 echo !C_BLUE!------------------------------------------------------------!C_RESET!
 echo.
 
+if /I not "!LLM_PROVIDER!"=="ollama" (
+    echo !C_YELLOW![SKIP] LLM_PROVIDER is !LLM_PROVIDER!; Ollama is optional.!C_RESET!
+    set "OLLAMA_OK=1"
+    set "OLLAMA_SERVER_OK=1"
+) else (
 ollama --version >nul 2>&1
 
 if errorlevel 1 (
@@ -368,17 +376,6 @@ if errorlevel 1 (
     echo !C_GREEN![OK] !C_RESET!!OLLAMA_VERSION!
     set "OLLAMA_OK=1"
 
-    if "!PYTHON_OK!"=="1" (
-        py -c "import ollama" >nul 2>&1
-        if errorlevel 1 (
-            echo !C_RED![NG] Ollama Python Library!C_RESET!
-            set "OLLAMA_PYTHON_OK=0"
-        ) else (
-            echo !C_GREEN![OK] Ollama Python Library!C_RESET!
-            set "OLLAMA_PYTHON_OK=1"
-        )
-    )
-
     powershell -NoProfile -Command "try { Invoke-WebRequest -Uri 'http://localhost:11434/api/tags' -UseBasicParsing -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }" >nul 2>&1
 
     if errorlevel 1 (
@@ -386,7 +383,16 @@ if errorlevel 1 (
     ) else (
         echo !C_GREEN![OK] Ollama server is running.!C_RESET!
         set "OLLAMA_SERVER_OK=1"
+        powershell -NoProfile -Command "$m=(Invoke-RestMethod -Uri 'http://localhost:11434/api/tags' -TimeoutSec 5).models.name; if($m -contains '!OLLAMA_MODEL!'){exit 0}else{exit 1}" >nul 2>&1
+        if errorlevel 1 (
+            echo !C_YELLOW![WARN] Required Ollama model !OLLAMA_MODEL! is missing.!C_RESET!
+            set /a MISSING_COUNT+=1
+        ) else (
+            echo !C_GREEN![OK] Required Ollama model !OLLAMA_MODEL!!C_RESET!
+            set "OLLAMA_MODEL_OK=1"
+        )
     )
+)
 )
 
 rem ================================================================
@@ -445,20 +451,18 @@ if "!PYTHON_OK!"=="1" if "!PYTHON_PACKAGES_OK!"=="0" (
         cd /d "%BACKEND_DIR%"
 
         echo.
-        echo !C_CYAN!Updating pip...!C_RESET!
-        py -m pip install --upgrade pip --progress-bar on
-
-        if errorlevel 1 (
-            echo !C_RED![ERROR] Failed to update pip.!C_RESET!
+        if not exist requirements.txt (
+            echo !C_RED![ERROR] requirements.txt was not found.!C_RESET!
         ) else (
             echo.
-            echo !C_CYAN!Installing Python dependencies...!C_RESET!
+            echo !C_CYAN!Installing missing Python dependencies from requirements.txt...!C_RESET!
             py -m pip install -r requirements.txt --progress-bar on
 
             if errorlevel 1 (
-                echo !C_RED![ERROR] Failed to install Python dependencies.!C_RESET!
+                echo !C_RED![ERROR] Python dependency installation failed.!C_RESET!
             ) else (
                 echo !C_GREEN![OK] Python dependencies installed.!C_RESET!
+                set "PYTHON_PACKAGES_OK=1"
             )
         )
     )
@@ -502,12 +506,17 @@ if "!NODE_OK!"=="1" if "!NPM_OK!"=="1" if "!FRONTEND_DEPS_OK!"=="0" (
 
         echo.
         echo !C_CYAN!Installing frontend dependencies...!C_RESET!
-        call npm install --progress=true
+        if exist package-lock.json (
+            call npm ci --progress=true
+        ) else (
+            call npm install --progress=true
+        )
 
         if errorlevel 1 (
             echo !C_RED![ERROR] npm install failed.!C_RESET!
         ) else (
             echo !C_GREEN![OK] Frontend dependencies installed.!C_RESET!
+            set "FRONTEND_DEPS_OK=1"
         )
     )
 
@@ -533,6 +542,7 @@ if "!ENV_OK!"=="0" (
                 echo !C_RED![ERROR] Failed to create .env.!C_RESET!
             ) else (
                 echo !C_GREEN![OK] Created .env from .env.example.!C_RESET!
+                set "ENV_OK=1"
             )
         )
 
@@ -563,6 +573,7 @@ if "!BACKEND_DIRS_OK!"=="0" (
         if not exist "%BACKEND_DIR%\plugins\." mkdir "%BACKEND_DIR%\plugins"
 
         echo !C_GREEN![OK] Backend directories are ready.!C_RESET!
+        set "BACKEND_DIRS_OK=1"
     )
 
     echo.
@@ -572,7 +583,17 @@ rem ================================================================
 rem Installation approval: Ollama
 rem ================================================================
 
-if "!OLLAMA_OK!"=="0" (
+if /I "!LLM_PROVIDER!"=="ollama" if "!OLLAMA_OK!"=="1" if "!OLLAMA_SERVER_OK!"=="1" if "!OLLAMA_MODEL_OK!"=="0" (
+    choice /C YN /N /M "Required model !OLLAMA_MODEL! is not installed. Pull it now? [Y/N]: "
+    if errorlevel 2 (
+        echo !C_YELLOW![SKIP] Ollama model pull skipped.!C_RESET!
+    ) else (
+        ollama pull "!OLLAMA_MODEL!"
+        if errorlevel 1 (echo !C_RED![ERROR] Ollama model pull failed.!C_RESET!) else (set "OLLAMA_MODEL_OK=1")
+    )
+)
+
+if /I "!LLM_PROVIDER!"=="ollama" if "!OLLAMA_OK!"=="0" (
     echo !C_WHITE!Ollama is not installed.!C_RESET!
     echo.
     echo !C_WHITE![1]!C_RESET! Open the official Ollama download page
@@ -609,32 +630,37 @@ rem ================================================================
 :CREATE_ENV_AND_FINISH
 
 cd /d "%BACKEND_DIR%"
-
-if not exist "data\." mkdir "data"
-if not exist "data\exports\." mkdir "data\exports"
-if not exist "data\images\." mkdir "data\images"
-if not exist "data\chroma\." mkdir "data\chroma"
-if not exist "plugins\." mkdir "plugins"
-
-if not exist ".env" if exist ".env.example" (
-    echo.
-    echo !C_YELLOW![INFO] .env is still missing.!C_RESET!
-    choice /C YN /N /M "Create .env from .env.example now? [Y/N]: "
-
-    if not errorlevel 2 (
-        copy /Y ".env.example" ".env" >nul
-        echo !C_GREEN![OK] .env created.!C_RESET!
-    )
+if errorlevel 1 (
+    echo !C_RED![ERROR] Failed to enter backend directory.!C_RESET!
+    goto :FINISH
 )
 
 rem ================================================================
 rem Finish
 rem ================================================================
 
+:FINISH
+
 echo.
 echo !C_CYAN!============================================================!C_RESET!
 echo !C_GREEN!                    SETUP COMPLETED!C_RESET!
 echo !C_CYAN!============================================================!C_RESET!
+echo.
+
+if "!PYTHON_OK!"=="1" (echo [OK] Python !PYTHON_VERSION!) else (echo [WARN] Python installation is still required.)
+if "!PYTHON_PACKAGES_OK!"=="1" (echo [OK] Python packages) else (echo [WARN] Python packages are missing or were skipped.)
+if "!NODE_OK!"=="1" (echo [OK] Node.js !NODE_VERSION!) else (echo [WARN] Node.js installation is still required.)
+if "!NPM_OK!"=="1" (echo [OK] npm !NPM_VERSION!) else (echo [WARN] npm was not found.)
+if "!FRONTEND_DEPS_OK!"=="1" (echo [OK] Frontend dependencies) else (echo [WARN] Frontend dependencies are missing or were skipped.)
+if "!ENV_OK!"=="1" (echo [OK] Environment) else (echo [WARN] .env is missing or was skipped.)
+if "!BACKEND_DIRS_OK!"=="1" (echo [OK] Backend directories) else (echo [WARN] Some backend directories are missing or were skipped.)
+if /I not "!LLM_PROVIDER!"=="ollama" (
+    echo [SKIP] Ollama checks; configured provider is !LLM_PROVIDER!.
+) else (
+    if "!OLLAMA_OK!"=="1" (echo [OK] Ollama installed) else (echo [WARN] Ollama is not installed.)
+    if "!OLLAMA_SERVER_OK!"=="1" (echo [OK] Ollama server) else (echo [WARN] Ollama is installed but server is not running, or Ollama is missing.)
+    if "!OLLAMA_MODEL_OK!"=="1" (echo [OK] Required Ollama model !OLLAMA_MODEL!) else (echo [WARN] Required Ollama model is missing or could not be checked.)
+)
 echo.
 
 echo !C_WHITE!The setup process is complete.!C_RESET!

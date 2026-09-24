@@ -20,9 +20,11 @@ import {
   exportData as apiExportData,
   importData as apiImportData,
   sendChatMessage,
+  listProviders,
   type AgentMode,
   type ChatMessage,
   type SessionSummary,
+  type ProviderInfo,
 } from "@/lib/api";
 
 const DEFAULT_MODEL = "qwen2.5:latest";
@@ -33,6 +35,8 @@ export default function HomePage(): React.JSX.Element {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [mode, setMode] = useState<AgentMode>("QUALITY");
   const [ollamaModel, setOllamaModel] = useState<string>(DEFAULT_MODEL);
+  const [providers, setProviders] = useState<ProviderInfo[]>([]);
+  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -57,6 +61,13 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     void refreshSessions();
   }, [refreshSessions]);
+
+  useEffect(() => {
+    void listProviders().then((available) => {
+      setProviders(available);
+      setSelectedProvider((current) => current ?? available.find((item) => item.is_default)?.provider ?? available[0]?.provider ?? null);
+    }).catch((error) => console.error("Provider一覧の取得に失敗しました:", error));
+  }, []);
 
   const handleNewChat = useCallback((): void => {
     setActiveSessionId(null);
@@ -135,7 +146,7 @@ export default function HomePage(): React.JSX.Element {
       startChatRequest(userMessage, { regenerate: false });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeSessionId, mode, refreshSessions]
+    [activeSessionId, mode, refreshSessions, selectedProvider]
   );
 
   const handleRetryMessage = useCallback(
@@ -154,7 +165,7 @@ export default function HomePage(): React.JSX.Element {
       startChatRequest(userMessageContent, { regenerate: true });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [messages, activeSessionId, mode, refreshSessions]
+    [messages, activeSessionId, mode, refreshSessions, selectedProvider]
   );
 
   /**
@@ -187,6 +198,7 @@ export default function HomePage(): React.JSX.Element {
     void sendChatMessage(userMessage, activeSessionId, mode, {
       signal: controller.signal,
       regenerate: options.regenerate,
+      provider: selectedProvider,
       onChunk: (chunk) => {
         accumulated += chunk;
         setStreamingContent(accumulated);
@@ -278,6 +290,9 @@ export default function HomePage(): React.JSX.Element {
       <ChatWindow
         messages={messages}
         mode={mode}
+        providers={providers}
+        selectedProvider={selectedProvider}
+        onProviderChange={setSelectedProvider}
         isSending={isSending}
         streamingContent={streamingContent}
         toolStatuses={toolStatuses}

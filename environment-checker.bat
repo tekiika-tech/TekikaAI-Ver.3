@@ -296,6 +296,16 @@ if /I not "!LLM_PROVIDER!"=="ollama" (
             set /a ERROR_COUNT+=1
         ) else (
             powershell -NoProfile -Command "Write-Host '[OK] Connected to the Ollama server.' -ForegroundColor Green"
+            set "OLLAMA_MODEL=qwen2.5:latest"
+            if exist "%~dp0tekika-ai-backend\.env" (
+                for /f "usebackq tokens=1,* delims==" %%A in (`findstr /B /C:"OLLAMA_DEFAULT_MODEL=" "%~dp0tekika-ai-backend\.env"`) do set "OLLAMA_MODEL=%%B"
+            )
+            powershell -NoProfile -Command "$m=(Invoke-RestMethod -Uri 'http://localhost:11434/api/tags' -TimeoutSec 5).models.name; if($m -contains '!OLLAMA_MODEL!'){exit 0}else{exit 1}" >nul 2>&1
+            if errorlevel 1 (
+                powershell -NoProfile -Command "Write-Host '[WARN] Required Ollama model !OLLAMA_MODEL! is missing.' -ForegroundColor Yellow"
+            ) else (
+                powershell -NoProfile -Command "Write-Host '[OK] Required Ollama model !OLLAMA_MODEL!' -ForegroundColor Green"
+            )
         )
 
         echo.

@@ -221,6 +221,24 @@ class FileSystemTool:
         entries.sort(key=lambda item: (not item["is_dir"], item["name"].lower()))
         return entries
 
+    def read_file(self, file_path: str) -> Dict[str, Any]:
+        """Read an existing UTF-8 text file and return its exact contents and metadata.
+
+        Binary files and files that are not valid UTF-8 are rejected instead of
+        being decoded with replacement characters, so the viewer never invents
+        or silently changes file contents.
+        """
+        target = self._resolve_and_validate(file_path, must_exist=True)
+        if not target.is_file():
+            raise FileSystemToolError(f"指定されたパスはファイルではありません: {target}")
+        try:
+            content = target.read_text(encoding="utf-8")
+        except UnicodeDecodeError as exc:
+            raise FileSystemToolError(f"UTF-8テキストファイルではありません: {target}") from exc
+        except OSError as exc:
+            raise FileSystemToolError(f"ファイルを読み込めません: {target} ({exc})") from exc
+        return {"path": str(target), "name": target.name, "content": content}
+
     # ------------------------------------------------------------------
     # OSエクスプローラー連携
     # ------------------------------------------------------------------

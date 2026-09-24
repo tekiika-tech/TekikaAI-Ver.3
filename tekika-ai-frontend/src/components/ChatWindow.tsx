@@ -18,10 +18,14 @@ import { Send, Square, Sparkles, Zap, AlertCircle } from "lucide-react";
 import clsx from "clsx";
 import type { AgentMode, ChatMessage } from "@/lib/api";
 import MessageItem, { type ToolExecutionStatus } from "./MessageItem";
+import type { ProviderInfo } from "@/lib/api";
 
 export interface ChatWindowProps {
   messages: ChatMessage[];
   mode: AgentMode;
+  providers: ProviderInfo[];
+  selectedProvider: string | null;
+  onProviderChange: (provider: string | null) => void;
   isSending: boolean;
   streamingContent: string;
   toolStatuses: ToolExecutionStatus[];
@@ -35,6 +39,9 @@ export interface ChatWindowProps {
 export default function ChatWindow({
   messages,
   mode,
+  providers,
+  selectedProvider,
+  onProviderChange,
   isSending,
   streamingContent,
   toolStatuses,
@@ -87,6 +94,15 @@ export default function ChatWindow({
         <h1 className="text-sm font-semibold text-zinc-100">
           Project Agency — Tekika AI
         </h1>
+        <div className="flex items-center gap-3">
+        {providers.length > 0 && <label className="flex items-center gap-2 text-xs text-zinc-400">
+          Provider
+          <select value={selectedProvider ?? providers.find((item) => item.is_default)?.provider ?? ""} onChange={(event) => onProviderChange(event.target.value || null)} disabled={isSending}
+            className="max-w-36 rounded-md border border-zinc-700 bg-zinc-800 px-2 py-1 text-zinc-100">
+            {providers.map((item) => <option key={item.provider} value={item.provider}>{item.provider}</option>)}
+          </select>
+          <span className="hidden text-zinc-500 lg:inline">{providers.find((item) => item.provider === selectedProvider)?.default_model ?? providers.find((item) => item.is_default)?.default_model}</span>
+        </label>}
         <span
           className={clsx(
             "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
@@ -98,6 +114,7 @@ export default function ChatWindow({
           {mode === "QUALITY" ? <Sparkles size={12} /> : <Zap size={12} />}
           {mode === "QUALITY" ? "Quality Priority" : "Speed Priority"}
         </span>
+        </div>
       </div>
 
       {/* メッセージ一覧 */}
@@ -170,7 +187,7 @@ export default function ChatWindow({
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!inputValue.trim()}
+            disabled={!inputValue.trim() || isSending}
               aria-label="送信"
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-500"
             >

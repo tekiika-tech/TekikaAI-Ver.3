@@ -49,9 +49,23 @@ export interface MessageItemProps {
 interface CodeBlockProps {
   language: string;
   code: string;
+  showHeader?: boolean;
 }
 
-function CodeBlock({ language, code }: CodeBlockProps): React.JSX.Element {
+const FILE_LANGUAGES: Record<string, string> = {
+  py: "python", ts: "typescript", tsx: "tsx", js: "javascript", jsx: "jsx",
+  json: "json", css: "css", html: "html", htm: "html", bat: "bat", cmd: "bat",
+  ps1: "powershell", yaml: "yaml", yml: "yaml", xml: "xml", sql: "sql", java: "java",
+  cpp: "cpp", h: "c", hpp: "cpp", c: "c", rs: "rust", go: "go", md: "markdown",
+  toml: "toml", ini: "ini", conf: "text", txt: "text",
+};
+
+function fileLanguage(path: string): string {
+  const extension = path.split(".").pop()?.toLowerCase() ?? "";
+  return FILE_LANGUAGES[extension] ?? "text";
+}
+
+function CodeBlock({ language, code, showHeader = true }: CodeBlockProps): React.JSX.Element {
   const [copied, setCopied] = useState<boolean>(false);
 
   const handleCopy = async (): Promise<void> => {
@@ -66,7 +80,7 @@ function CodeBlock({ language, code }: CodeBlockProps): React.JSX.Element {
 
   return (
     <div className="my-3 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900">
-      <div className="flex items-center justify-between border-b border-zinc-700 bg-zinc-800 px-3 py-1.5">
+      {showHeader && <div className="flex items-center justify-between border-b border-zinc-700 bg-zinc-800 px-3 py-1.5">
         <span className="text-xs font-medium text-zinc-400">
           {language || "text"}
         </span>
@@ -83,11 +97,11 @@ function CodeBlock({ language, code }: CodeBlockProps): React.JSX.Element {
           ) : (
             <>
               <Copy size={13} />
-              コピー
+              コード全体をコピー
             </>
           )}
         </button>
-      </div>
+      </div>}
       <SyntaxHighlighter
         language={language || "text"}
         style={oneDark}
@@ -96,6 +110,8 @@ function CodeBlock({ language, code }: CodeBlockProps): React.JSX.Element {
           padding: "0.75rem",
           fontSize: "0.8125rem",
           background: "transparent",
+          maxHeight: "32rem",
+          overflow: "auto",
         }}
         wrapLongLines
       >
@@ -135,6 +151,14 @@ function ToolStatusBadge({
       {status.detail && (
         <span className="truncate text-zinc-500">— {status.detail}</span>
       )}
+      {(status.arguments || status.result !== undefined) && status.status !== "running" && (
+        <details className="ml-auto min-w-0 max-w-[55%] text-zinc-400">
+          <summary className="cursor-pointer select-none">詳細</summary>
+          <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded bg-black/30 p-2 text-[0.7rem]">
+            {JSON.stringify({ arguments: status.arguments, result: status.result }, null, 2)}
+          </pre>
+        </details>
+      )}
     </div>
   );
 }
@@ -171,6 +195,25 @@ function ToolResultView({ status }: { status: ToolExecutionStatus }): React.JSX.
         ? status.arguments.dir_path
         : undefined) ?? "";
     return <FileTree directory={directory} entries={status.result} />;
+  }
+  if (status.toolName === "read_file" && status.status === "done" &&
+      status.result && typeof status.result === "object") {
+    const file = status.result as { path?: unknown; name?: unknown; content?: unknown };
+    if (typeof file.content === "string") {
+      const path = typeof file.path === "string" ? file.path : String(file.name ?? "file");
+      const language = fileLanguage(path);
+      return (
+        <section className="mb-3 w-full overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950">
+          <header className="flex items-center justify-between gap-3 border-b border-zinc-700 bg-zinc-800 px-3 py-2">
+            <span className="truncate font-mono text-xs text-zinc-200" title={path}>{path}</span>
+            <span className="shrink-0 text-xs uppercase text-zinc-400">{language}</span>
+          </header>
+          <div className="max-h-[32rem] overflow-auto">
+            <CodeBlock language={language} code={file.content} showHeader={false} />
+          </div>
+        </section>
+      );
+    }
   }
   return <ToolStatusBadge status={status} />;
 }

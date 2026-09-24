@@ -11,6 +11,7 @@ __pycache__/
 
 # Frontend
 node_modules/
+.npm-cache/
 .next/
 out/
 dist/
@@ -32,3 +33,6 @@ Thumbs.db
 # Generated archives
 TekikaAI-Distribution.zip
 TekikaAI-source.zip
+
+# Local AI handoff notes
+AI_HANDOFF.md
